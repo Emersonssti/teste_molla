@@ -1,0 +1,6 @@
+.git
+vendor
+material_apoio
+storage/uploads/*
+!storage/uploads/.gitignore
+*.md
