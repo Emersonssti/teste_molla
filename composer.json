@@ -1,0 +1,17 @@
+{
+    "name": "dataflow/app",
+    "description": "Teste BI Molla - Case Técnico Analista de BI",
+    "type": "project",
+    "require": {
+        "php": ">=8.1",
+        "phpoffice/phpspreadsheet": "^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
