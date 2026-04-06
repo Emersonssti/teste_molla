@@ -164,6 +164,7 @@ final class AnalysisController extends Controller
         $totalEleg = count($elegiveis);
 
         return [
+            'periodo' => implode(', ', $periodos),
             'abrangencia' => 'Todos os períodos da campanha',
             'periodos_disponiveis' => $periodos,
             'total_distribuidores' => $totalDist,
