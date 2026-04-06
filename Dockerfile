@@ -25,7 +25,7 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 COPY . .
 
-RUN mkdir -p storage/uploads \
-    && chown -R www-data:www-data /var/www/html
+RUN mkdir -p storage/uploads storage/logs \
+    && chown -R www-data:www-data storage
 
 EXPOSE 80
