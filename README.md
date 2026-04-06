@@ -101,7 +101,7 @@ Aponte o `DocumentRoot` para a pasta `public/`. O `.htaccess` já está configur
 │   └── assets/
 │       ├── css/style.css                # Estilos da tela inicial
 │       └── js/
-│           ├── index.js                 # JS da tela de upload
+│           ├── home.js                  # JS da tela de upload
 │           └── dashboard.js             # JS do dashboard (charts, grid, filtros)
 ├── storage/uploads/                     # Uploads temporários (runtime)
 ├── material_apoio/                      # PDFs do regulamento (referência)
