@@ -1,22 +1,31 @@
-FROM php:8.2-apache
+FROM php:8.3-apache
 
-# 1. Configura a raiz do Apache para /public
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+RUN apt-get update && apt-get install -y \
+    libzip-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    unzip \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install zip gd \
+    && a2enmod rewrite \
+    && rm -rf /var/lib/apt/lists/*
 
-# 2. Instala o Composer diretamente na imagem final (mais leve que multi-stage em VPS pequena)
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
+    && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
+    && sed -ri -e 's/AllowOverride None/AllowOverride All/g' /etc/apache2/apache2.conf
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# 3. Copia os arquivos
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
 COPY . .
 
-# 4. Instala dependências (se o erro persistir aqui, precisaremos aumentar o SWAP da VPS)
-RUN composer install --no-dev --optimize-autoloader
+RUN mkdir -p storage/uploads \
+    && chown -R www-data:www-data /var/www/html
 
-# 5. Permissões e Rewrite
-RUN a2enmod rewrite
-RUN chown -R www-data:www-data /var/www/html
 EXPOSE 80
