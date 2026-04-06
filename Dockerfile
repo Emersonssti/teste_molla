@@ -1,15 +1,13 @@
 FROM php:8.2-apache
 
-# Define o diretório de trabalho
-WORKDIR /var/www/html
+# Muda a raiz do Apache para a pasta public do seu projeto
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# Copia apenas o necessário do seu projeto
+WORKDIR /var/www/html
 COPY . .
 
-# Habilita o mod_rewrite do Apache para rotas amigáveis
 RUN a2enmod rewrite
-
-# Dá permissão para o Apache ler seus arquivos
 RUN chown -R www-data:www-data /var/www/html
-
 EXPOSE 80
