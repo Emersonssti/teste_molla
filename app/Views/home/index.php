@@ -57,4 +57,4 @@ declare(strict_types=1);
 <!-- Input file oculto para upload -->
 <input type="file" id="file-input" accept=".xlsx,.xls" style="display: none;">
 
-<script src="<?= htmlspecialchars(asset('js/index.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
+<script src="<?= htmlspecialchars(asset('js/home.js'), ENT_QUOTES, 'UTF-8') ?>"></script>
