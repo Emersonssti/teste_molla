@@ -25,7 +25,13 @@ if (session_status() === PHP_SESSION_NONE) {
  */
 function asset(string $path): string
 {
-    return '/assets/' . ltrim($path, '/');
+    $rel = ltrim($path, '/');
+    $url = '/assets/' . $rel;
+    $abs = BASE_PATH . '/public' . $url;
+    if (is_file($abs)) {
+        $url .= '?v=' . (string) filemtime($abs);
+    }
+    return $url;
 }
 
 /**
