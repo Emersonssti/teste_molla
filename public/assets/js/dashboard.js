@@ -43,6 +43,9 @@ function initFilters() {
         const el = document.getElementById(id);
         if (el) el.addEventListener('change', applyFilters);
     });
+
+    const periodoEl = document.getElementById('filter-periodo');
+    if (periodoEl) periodoEl.addEventListener('change', clearAIAnalysis);
 }
 
 function populateSelect(id, options, allLabel) {
@@ -176,7 +179,7 @@ function renderKPIs(kpis) {
                         <div class="metric-value">${k.value}</div>
                         ${k.sub ? `<div style="font-size:.72rem;color:#9ca3af">${k.sub}</div>` : ''}
                     </div>
-                    <div class="kpi-icon bg-${k.color} bg-opacity-10 text-${k.color}"><i class="${k.icon}"></i></div>
+                    <div class="kpi-icon bg-${k.color} bg-opacity-10"><i class="${k.icon}" style="color:#fff"></i></div>
                 </div>
             </div>
         </div>
@@ -495,26 +498,39 @@ function getFilteredDistributors() { return lastProcessedData?.distributors || [
 
 // ── AI Analysis ──
 let aiAnalysisCache = null;
+let aiLastPeriodo = null;
+
+function clearAIAnalysis() {
+    aiAnalysisCache = null;
+    aiLastPeriodo = null;
+    const content = document.getElementById('ai-content');
+    const modal = document.getElementById('ai-modal');
+    if (content) content.innerHTML = '';
+    if (modal) modal.classList.remove('active');
+}
 
 function requestAIAnalysis() {
     const modal = document.getElementById('ai-modal');
     const loading = document.getElementById('ai-loading');
     const content = document.getElementById('ai-content');
     const btn = document.getElementById('btn-ai-analysis');
+    const currentPeriodo = document.getElementById('filter-periodo')?.value || '';
 
     modal.classList.add('active');
 
-    if (aiAnalysisCache) {
+    if (aiAnalysisCache && aiLastPeriodo === currentPeriodo) {
         loading.style.display = 'none';
         content.style.display = 'block';
         return;
     }
 
+    aiAnalysisCache = null;
     loading.style.display = 'block';
     content.style.display = 'none';
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="bi bi-hourglass-split me-1"></i> Analisando...'; }
 
-    fetch('/api/analysis')
+    const params = currentPeriodo ? '?periodo=' + encodeURIComponent(currentPeriodo) : '';
+    fetch('/api/analysis' + params)
         .then(r => {
             if (!r.ok) throw new Error('HTTP ' + r.status);
             return r.json();
@@ -523,6 +539,7 @@ function requestAIAnalysis() {
             if (!data.success) throw new Error(data.message || 'Erro desconhecido');
 
             aiAnalysisCache = data;
+            aiLastPeriodo = currentPeriodo;
             const summary = data.summary;
 
             let html = `<div class="ai-summary-grid">

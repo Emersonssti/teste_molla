@@ -24,6 +24,17 @@ final class AnalysisController extends Controller
             $dataset = $this->loadDataset();
             $allRows = $dataset->all();
 
+            $periodoFilter = $_GET['periodo'] ?? null;
+            if ($periodoFilter) {
+                $parts = explode('-', $periodoFilter);
+                if (count($parts) === 2) {
+                    $filterAno = (int)$parts[0];
+                    $filterMes = (int)$parts[1];
+                    $allRows = array_filter($allRows, fn($row) => ($row->ano ?? 0) === $filterAno && ($row->mesNumero ?? 0) === $filterMes);
+                    $allRows = array_values($allRows);
+                }
+            }
+
             $summary = $this->buildSummary($allRows);
             $prompt = $this->buildPrompt($summary);
             $grokResponse = $this->callGrok($prompt);
@@ -85,8 +96,11 @@ final class AnalysisController extends Controller
                 ];
             }
 
-            $periodo = ($row->mes ?? '?') . '/' . ($row->ano ?? '?');
-            if (!in_array($periodo, $periodos)) $periodos[] = $periodo;
+            $mesNum = $row->mesNumero ?? 0;
+            $anoNum = $row->ano ?? 0;
+            $periodoKey = $anoNum * 100 + $mesNum;
+            $periodo = $mesNum . '/' . $anoNum;
+            if (!isset($periodos[$periodoKey])) $periodos[$periodoKey] = $periodo;
 
             if ($row->kpiType === 'TOTAL_VOLUME') {
                 $distributors[$distId]['vol_meta'] += (float)($row->meta ?? 0);
@@ -163,10 +177,16 @@ final class AnalysisController extends Controller
         $totalDist = count($distributors);
         $totalEleg = count($elegiveis);
 
+        ksort($periodos);
+        $periodosOrdenados = array_values($periodos);
+        $periodoLabel = count($periodosOrdenados) > 1
+            ? reset($periodosOrdenados) . ' a ' . end($periodosOrdenados)
+            : ($periodosOrdenados[0] ?? '—');
+
         return [
-            'periodo' => implode(', ', $periodos),
-            'abrangencia' => 'Todos os períodos da campanha',
-            'periodos_disponiveis' => $periodos,
+            'periodo' => $periodoLabel,
+            'abrangencia' => count($periodosOrdenados) > 1 ? 'Todos os períodos da campanha' : 'Período único',
+            'periodos_disponiveis' => $periodosOrdenados,
             'total_distribuidores' => $totalDist,
             'elegiveis' => $totalEleg,
             'taxa_elegibilidade' => $totalDist > 0 ? round(($totalEleg / $totalDist) * 100, 1) : 0,

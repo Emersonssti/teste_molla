@@ -54,13 +54,12 @@ final class DashboardDataProcessor
                 'isFocusCategory' => $row->isFocusCategory,
                 'kpiType' => $row->kpiType,
                 'ano' => $row->ano,
-                'mes' => $row->mes,
+                'mes' => $row->mesNumero,
                 'meta' => $row->meta,
                 'realizado' => $row->realizado,
             ];
 
-            // Extrair filtros distinct
-            $periodKey = $row->ano . '-' . ($row->mes ?? '00');
+            $periodKey = $row->ano . '-' . str_pad((string)($row->mesNumero ?? 0), 2, '0', STR_PAD_LEFT);
             if (!in_array($periodKey, $periods)) {
                 $periods[] = $periodKey;
             }

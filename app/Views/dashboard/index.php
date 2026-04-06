@@ -21,18 +21,17 @@ declare(strict_types=1);
     body {
         font-family: 'Inter', sans-serif;
         font-size: 13px;
-        background: linear-gradient(135deg, #FF671F 0%, #e0520a 100%);
+        background: #f8fafc;
         min-height: 100vh;
         margin: 0;
     }
 
     .dashboard-container {
         background: white;
-        border-radius: 20px 20px 0 0;
-        margin-top: 16px;
+        border-radius: 0;
+        margin-top: 0;
         padding: 1.25rem;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-        min-height: calc(100vh - 16px);
+        min-height: 100vh;
     }
 
     .header-section {
